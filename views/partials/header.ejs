@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Odin Book</title>
+  <!-- Google Fonts: Fraunces (serif, untuk heading/wordmark) + Work Sans (sans, untuk body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;1,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <!-- Navbar ni papar kat semua page (kecuali login/register, sebab currentUser belum wujud) -->
+  <% if (typeof currentUser !== 'undefined' && currentUser) { %>
+    <div class="topbar">
+      <div class="topbar-inner">
+        <a href="/" class="wordmark">Odin Book</a>
+        <nav class="nav-links">
+          <a href="/">Feed</a>
+          <a href="/users">Semua User</a>
+          <a href="/users/requests/pending">Follow Requests</a>
+          <a href="/users/<%= currentUser.id %>">Profile Saya</a>
+          <a href="/auth/logout">Logout</a>
+        </nav>
+      </div>
+    </div>
+  <% } %>
+
+  <div class="page">
+    <!-- Papar mesej flash (error/success) kalau ada -->
+    <% if (errorMessage && errorMessage.length > 0) { %>
+      <div class="flash flash-error"><%= errorMessage[0] %></div>
+    <% } %>
+    <% if (successMessage && successMessage.length > 0) { %>
+      <div class="flash flash-success"><%= successMessage[0] %></div>
+    <% } %>

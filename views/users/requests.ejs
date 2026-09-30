@@ -1,0 +1,32 @@
+<%- include('../partials/header') %>
+
+<h1>Follow Requests</h1>
+
+<!-- Kalau takde request langsung, papar empty state -->
+<% if (requests.length === 0) { %>
+  <p class="empty-state">Takde follow request buat masa ni.</p>
+<% } %>
+
+<!-- Loop setiap request, "request.follower" adalah orang yang hantar request tu -->
+<% requests.forEach(function(request) { %>
+  <div class="user-card">
+    <a href="/users/<%= request.follower.id %>" class="user-card-info">
+      <%- include('../partials/avatar', { user: request.follower }) %>
+      <span class="user-card-name"><%= request.follower.displayName || request.follower.username %></span>
+    </a>
+
+    <div style="display:flex; gap:8px;">
+      <!-- Button Accept - POST ke /users/:id/accept-follow, :id = ID orang yang hantar -->
+      <form action="/users/<%= request.follower.id %>/accept-follow" method="POST">
+        <button type="submit" class="btn btn-small">Accept</button>
+      </form>
+
+      <!-- Button Reject - POST ke /users/:id/reject-follow -->
+      <form action="/users/<%= request.follower.id %>/reject-follow" method="POST">
+        <button type="submit" class="btn-ghost btn-small">Reject</button>
+      </form>
+    </div>
+  </div>
+<% }); %>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,57 @@
+<%- include('partials/header') %>
+
+<h1>Feed</h1>
+
+<!-- Composer - form create post baru -->
+<div class="composer">
+  <form action="/posts" method="POST" enctype="multipart/form-data">
+    <textarea name="content" placeholder="Apa yang kau fikir?" required></textarea>
+    <label>Tambah gambar (optional)</label>
+    <input type="file" name="image" accept="image/*">
+    <button type="submit" class="btn">Post</button>
+  </form>
+</div>
+
+<!-- Kalau takde post langsung, papar empty state -->
+<% if (posts.length === 0) { %>
+  <p class="empty-state">Takde post lagi. Mula follow orang atau buat post pertama kau!</p>
+<% } %>
+
+<!-- Loop setiap post dalam array "posts" yang controller hantar -->
+<% posts.forEach(function(post) { %>
+  <div class="post">
+    <div class="post-header">
+      <%- include('partials/avatar', { user: post.author }) %>
+      <span class="post-author"><%= post.author.displayName || post.author.username %></span>
+    </div>
+
+    <p class="post-content"><%= post.content %></p>
+
+    <!-- Papar gambar kalau post ada imageUrl -->
+    <% if (post.imageUrl) { %>
+      <img src="<%= post.imageUrl %>" alt="post image" class="post-image">
+    <% } %>
+
+    <div class="post-actions">
+      <!-- Like button - form kecil, POST ke /posts/:id/like -->
+      <form action="/posts/<%= post.id %>/like" method="POST">
+        <button type="submit" class="like-btn">♥ <%= post.likes.length %></button>
+      </form>
+    </div>
+
+    <!-- Senarai comment untuk post ni -->
+    <div class="comments">
+      <% post.comments.forEach(function(comment) { %>
+        <p class="comment"><strong><%= comment.author ? (comment.author.displayName || comment.author.username) : 'Someone' %>:</strong> <%= comment.content %></p>
+      <% }); %>
+    </div>
+
+    <!-- Form tambah comment baru -->
+    <form action="/posts/<%= post.id %>/comments" method="POST" class="comment-form">
+      <input type="text" name="content" placeholder="Tulis comment..." required>
+      <button type="submit" class="btn btn-small">Hantar</button>
+    </form>
+  </div>
+<% }); %>
+
+<%- include('partials/footer') %>

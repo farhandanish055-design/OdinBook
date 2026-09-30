@@ -1,0 +1,58 @@
+<%- include('../partials/header') %>
+
+<div class="profile-header">
+  <%- include('../partials/avatar', { user: profileUser }) %>
+  <div>
+    <h1><%= profileUser.displayName || profileUser.username %></h1>
+    <span style="color: var(--muted); font-size: 14px;">@<%= profileUser.username %></span>
+  </div>
+</div>
+
+<p class="profile-bio"><%= profileUser.bio || 'Tiada bio lagi.' %></p>
+
+<!-- Statistik ringkas: bilangan followers dan following -->
+<div class="profile-stats">
+  <span><strong><%= profileUser.followers.length %></strong> Followers</span>
+  <span><strong><%= profileUser.following.length %></strong> Following</span>
+  <span><strong><%= profileUser.posts.length %></strong> Post</span>
+</div>
+
+<!-- Form edit profile CUMA muncul kalau profileUser yang ditengok ni SAMA dengan currentUser -->
+<% if (currentUser && currentUser.id === profileUser.id) { %>
+  <div class="edit-profile">
+    <h3>Edit Profile</h3>
+    <form action="/users/<%= currentUser.id %>/update-profile" method="POST" enctype="multipart/form-data">
+      <label>Nama paparan</label>
+      <input type="text" name="displayName" value="<%= profileUser.displayName || '' %>">
+
+      <label>Bio</label>
+      <textarea name="bio" style="min-height:50px"><%= profileUser.bio || '' %></textarea>
+
+      <label>Tukar gambar profile</label>
+      <input type="file" name="profilePicture" accept="image/*">
+
+      <button type="submit" class="btn">Simpan Perubahan</button>
+    </form>
+  </div>
+<% } %>
+
+<h2 class="section-title">Post-post</h2>
+
+<% if (profileUser.posts.length === 0) { %>
+  <p class="empty-state">Belum ada post lagi.</p>
+<% } %>
+
+<!-- Loop semua post yang user ni buat -->
+<% profileUser.posts.forEach(function(post) { %>
+  <div class="post">
+    <p class="post-content"><%= post.content %></p>
+    <% if (post.imageUrl) { %>
+      <img src="<%= post.imageUrl %>" alt="post image" class="post-image">
+    <% } %>
+    <div class="post-actions">
+      <span style="color: var(--muted); font-size: 13px;">♥ <%= post.likes.length %> likes, <%= post.comments.length %> comments</span>
+    </div>
+  </div>
+<% }); %>
+
+<%- include('../partials/footer') %>

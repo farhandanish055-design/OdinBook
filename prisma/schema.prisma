@@ -1,0 +1,99 @@
+// File ni define STRUKTUR database kita. Prisma akan baca file ni untuk generate
+// table sebenar dalam PostgreSQL bila kita run "npx prisma migrate dev"
+
+generator client {
+  provider = "prisma-client-js" // Generate JS client supaya kita boleh query DB guna JS code
+}
+
+datasource db {
+  provider = "postgresql"              // Kita guna PostgreSQL
+  url      = env("DATABASE_URL")       // Connection string diambil dari file .env
+}
+
+// ===================== USER =====================
+model User {
+  id             String   @id @default(uuid())   // Primary key, auto-generate UUID unik
+  username       String   @unique                 // Username kena unique, guna untuk login local
+  email          String?  @unique                 // Email optional (sebab github login mungkin tak bagi email)
+  password       String?                          // Password untuk local auth (nullable sebab github user takde password)
+  githubId       String?  @unique                 // ID dari GitHub, disimpan kalau user login guna GitHub
+  displayName    String?                          // Nama untuk paparan (boleh beza dari username)
+  bio            String?                          // Bio ringkas dalam profile
+  profilePicture String?                          // URL gambar profile (dari github, gravatar, atau upload)
+  isGuest        Boolean  @default(false)          // Tanda kalau ni guest account (extra credit feature)
+  createdAt      DateTime @default(now())          // Timestamp bila account dicipta
+
+  // ---- Relationships (macam "sambungan" antara table) ----
+  posts          Post[]                            // Satu user boleh ada banyak post
+  comments       Comment[]                         // Satu user boleh ada banyak comment
+  likes          Like[]                            // Satu user boleh like banyak post
+
+  // Follow system: kita guna table Follow berasingan sebab hubungan ni "many-to-many"
+  // dengan extra info (status pending/accepted). "following" = orang yang DIA follow.
+  following      Follow[] @relation("Following")   // Senarai follow request yang DIA hantar
+  followers      Follow[] @relation("Followers")   // Senarai follow request yang orang lain hantar kat DIA
+}
+
+// ===================== POST =====================
+model Post {
+  id        String   @id @default(uuid())   // Primary key post
+  content   String                          // Text content post tu
+  imageUrl  String?                         // URL gambar (extra credit - post boleh ada gambar)
+  createdAt DateTime @default(now())        // Bila post dicipta, untuk sort "recent posts"
+
+  authorId  String                          // Foreign key rujuk kat User yang buat post
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  // onDelete: Cascade bermaksud kalau user delete account, semua post dia sekali terpadam
+
+  comments  Comment[]                       // Satu post boleh ada banyak comment
+  likes     Like[]                          // Satu post boleh ada banyak like
+}
+
+// ===================== COMMENT =====================
+model Comment {
+  id        String   @id @default(uuid())
+  content   String                          // Text comment
+  createdAt DateTime @default(now())
+
+  authorId  String                          // Sapa yang comment
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  postId    String                          // Comment ni untuk post yang mana
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+// ===================== LIKE =====================
+model Like {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  userId    String                          // Sapa yang like
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  postId    String                          // Post mana yang kena like
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])                // Constraint: satu user cuma boleh like SATU post SEKALI je
+}
+
+// ===================== FOLLOW =====================
+// Table ni handle "follow request". Status boleh PENDING atau ACCEPTED
+// supaya kita boleh implement follow request system (bukan terus auto-follow)
+model Follow {
+  id          String       @id @default(uuid())
+  status      FollowStatus @default(PENDING)   // PENDING = request belum accept, ACCEPTED = dah jadi follower
+  createdAt   DateTime     @default(now())
+
+  followerId  String                            // Orang yang HANTAR request (yang nak follow)
+  follower    User         @relation("Following", fields: [followerId], references: [id], onDelete: Cascade)
+
+  followingId String                            // Orang yang DITUJU (yang nak di-follow)
+  following   User         @relation("Followers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])           // Elak duplicate follow request pada orang yang sama
+}
+
+enum FollowStatus {
+  PENDING    // Request dah hantar, tunggu approval
+  ACCEPTED   // Dah jadi follower sah
+}

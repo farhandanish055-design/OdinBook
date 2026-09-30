@@ -1,0 +1,7 @@
+<% /* Partial ni terima "user" sebagai local. Kalau user ada profilePicture, papar gambar.
+      Kalau takde, papar placeholder bulat dengan huruf pertama nama dia (macam Slack/Gmail). */ %>
+<% if (user.profilePicture) { %>
+  <img src="<%= user.profilePicture %>" alt="<%= user.displayName || user.username %>" class="avatar">
+<% } else { %>
+  <div class="avatar-placeholder"><%= (user.displayName || user.username).charAt(0).toUpperCase() %></div>
+<% } %>

@@ -1,0 +1,33 @@
+<%- include('../partials/header') %>
+
+<h1>Semua User</h1>
+
+<% if (users.length === 0) { %>
+  <p class="empty-state">Takde user lain lagi. Jemput kawan kau daftar!</p>
+<% } %>
+
+<!-- Loop setiap user, papar nama dan button ikut status follow -->
+<% users.forEach(function(u) { %>
+  <div class="user-card">
+    <a href="/users/<%= u.id %>" class="user-card-info">
+      <%- include('../partials/avatar', { user: u }) %>
+      <span class="user-card-name"><%= u.displayName || u.username %></span>
+    </a>
+
+    <!-- followStatus datang dari controller: NONE, PENDING, atau ACCEPTED -->
+    <% if (u.followStatus === 'NONE') { %>
+      <!-- Belum follow langsung - papar button "Follow" -->
+      <form action="/users/<%= u.id %>/follow" method="POST">
+        <button type="submit" class="btn btn-small">Follow</button>
+      </form>
+    <% } else if (u.followStatus === 'PENDING') { %>
+      <!-- Dah hantar request tapi belum diaccept -->
+      <button class="btn btn-small" disabled>Pending...</button>
+    <% } else { %>
+      <!-- Status ACCEPTED - dah jadi follower -->
+      <button class="btn-ghost btn-small" disabled>Following</button>
+    <% } %>
+  </div>
+<% }); %>
+
+<%- include('../partials/footer') %>

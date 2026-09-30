@@ -1,0 +1,32 @@
+<%- include('../partials/header') %>
+
+<div class="auth-card">
+  <h1>Log masuk</h1>
+
+  <!-- Form untuk local login, hantar POST ke /auth/login -->
+  <form action="/auth/login" method="POST">
+    <label for="username">Username</label>
+    <input type="text" id="username" name="username" required>
+
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" required>
+
+    <button type="submit" class="btn">Log masuk</button>
+  </form>
+
+  <div class="auth-divider">atau</div>
+
+  <!-- Link ni akan redirect user ke GitHub untuk approve OAuth -->
+  <a href="/auth/github"><button type="button" class="btn-ghost" style="width:100%">Log masuk guna GitHub</button></a>
+
+  <br><br>
+
+  <!-- Form guest login - tak perlu isi apa-apa, terus create akaun sementara -->
+  <form action="/auth/guest" method="POST">
+    <button type="submit" class="btn-ghost" style="width:100%">Masuk sebagai Guest</button>
+  </form>
+
+  <p class="auth-switch">Tak ada akaun? <a href="/auth/register">Daftar di sini</a></p>
+</div>
+
+<%- include('../partials/footer') %>
